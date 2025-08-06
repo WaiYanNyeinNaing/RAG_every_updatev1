@@ -19,7 +19,7 @@
     </p>
     <p>
       <a href="https://github.com/HKUDS/RAG-Anything/stargazers"><img src='https://img.shields.io/github/stars/HKUDS/RAG-Anything?color=00d9ff&style=for-the-badge&logo=star&logoColor=white&labelColor=1a1a2e' /></a>
-      <img src="https://img.shields.io/badge/🐍Python-3.10-4ecdc4?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e">
+      <img src="https://img.shields.io/badge/🐍Python-3.9+-4ecdc4?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e">
       <a href="https://pypi.org/project/raganything/"><img src="https://img.shields.io/pypi/v/raganything.svg?style=for-the-badge&logo=pypi&logoColor=white&labelColor=1a1a2e&color=ff6b6b"></a>
     </p>
     <p>
@@ -228,6 +228,13 @@ The hybrid retrieval system combines vector similarity search with graph travers
   <img src="https://user-images.githubusercontent.com/74038190/212284158-e840e285-664b-44d7-b79b-e264b5e54825.gif" width="400">
 </div>
 
+### Python Version Requirements
+
+**Supported Python Versions**: Python 3.9+
+
+- **Python 3.9**: Use `lightrag-hku==1.3.9` (specified in requirements.txt)
+- **Python 3.10+**: Can use latest `lightrag-hku==1.4.5` for additional features
+
 ### Installation
 
 #### Option 1: Install from PyPI (Recommended)
@@ -248,6 +255,11 @@ pip install 'raganything[image,text]'       # Multiple features
 ```bash
 git clone https://github.com/HKUDS/RAG-Anything.git
 cd RAG-Anything
+
+# For Python 3.9 users (use the provided requirements.txt)
+pip install -r requirements.txt
+
+# For Python 3.10+ users (can use latest versions)
 pip install -e .
 
 # With optional dependencies
