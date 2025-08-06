@@ -1,14 +1,43 @@
+# Core dependencies
+python-dotenv==1.1.1
+gradio==4.44.0
+openai==1.50.0
 huggingface_hub
+
 # LightRAG packages
+# Note: Install from parent directory if available: pip install -e ..
+# Otherwise use: pip install lightrag-hku
 lightrag-hku
-# MinerU 2.0 packages (replaces magic-pdf)
-mineru[core]
-# Progress bars for batch processing
+
+# Document Processing & Parsing
+mineru[core]  # MinerU 2.0 for PDF parsing
+pypdf==4.3.1
+python-docx==1.1.2
+markdown==3.6
+Pillow>=10.0.0
+pandas==2.3.1
+openpyxl==3.1.5
 tqdm
-# Note: Optional dependencies are now defined in setup.py extras_require:
-# - [image]: Pillow>=10.0.0 (for BMP, TIFF, GIF, WebP format conversion)
+
+# Azure OpenAI specific
+azure-identity==1.17.1
+azure-core==1.30.2
+
+# Utilities
+aiohttp==3.12.15
+tenacity==9.1.2
+tiktoken==0.10.0
+networkx==3.4.2
+numpy>=2.0.0
+pydantic==2.11.7
+
+# Optional dependencies (uncomment as needed):
+# - [image]: Additional image processing
 # - [text]: reportlab>=4.0.0 (for TXT, MD to PDF conversion)
 # - [office]: requires LibreOffice (external program, not Python package)
-# - [all]: includes all optional dependencies
-#
-# Install with: pip install raganything[image,text] or pip install raganything[all]
+# - [docling]: docling==1.11.0 (alternative parser)
+
+# Development tools (optional)
+# pytest==8.3.2
+# pytest-asyncio==0.23.8
+# black==24.8.0

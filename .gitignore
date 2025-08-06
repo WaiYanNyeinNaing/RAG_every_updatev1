@@ -5,15 +5,19 @@ __pycache__/
 .eggs/
 *.tgz
 *.tar.gz
-*.ini
 
 # Virtual Environment
 .venv/
 env/
 venv/
+venv_rag_anything/
 
-*.env*
-.env_example
+# Environment files
+.env
+.env.*
+!.env.sample
+*.env
+env.example
 
 # Build / Distribution
 dist/
@@ -67,8 +71,10 @@ download_models_hf.py
 lightrag-dev/
 gui/
 
-# unit-test files
-test_*
+# unit-test files (keep our custom test scripts)
+# test_*
+.pytest_cache/
+__test__/
 
 # Cline files
 memory-bank/
