@@ -31,6 +31,9 @@ networkx==3.4.2
 numpy>=2.0.0
 pydantic==2.11.7
 
+# Google Gemini SDK (for Gemini version - alternative to Azure)
+google-generativeai>=0.8.0
+
 # Optional dependencies (uncomment as needed):
 # - [image]: Additional image processing
 # - [text]: reportlab>=4.0.0 (for TXT, MD to PDF conversion)
