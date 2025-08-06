@@ -1,46 +1,82 @@
+# RAG-Anything Requirements
+# Python 3.9+ compatible (use 3.10+ for latest features)
+
 # Core dependencies
-python-dotenv==1.1.1
+numpy==1.26.4
+python-dotenv==1.0.1
+nest_asyncio==1.6.0
+
+# LightRAG
+# For Python 3.9: lightrag-hku==1.3.9
+# For Python 3.10+: lightrag-hku==1.4.5
+lightrag-hku==1.3.9
+
+# UI Framework
 gradio==4.44.0
+gradio-client==1.3.0
+
+# LLM Providers
 openai==1.50.0
-huggingface_hub
+google-generativeai==0.8.5
 
-# LightRAG packages
-# Note: Install from parent directory if available: pip install -e ..
-# Otherwise use: pip install lightrag-hku
-lightrag-hku
-
-# Document Processing & Parsing
-mineru[core]  # MinerU 2.0 for PDF parsing
-pypdf==4.3.1
-python-docx==1.1.2
-markdown==3.6
-Pillow>=10.0.0
-pandas==2.3.1
-openpyxl==3.1.5
-tqdm
-
-# Azure OpenAI specific
+# Azure Support
 azure-identity==1.17.1
 azure-core==1.30.2
 
+# Document Processing
+Pillow==10.4.0
+pypdf==3.17.4
+pdfminer.six==20221105
+pypdfium2==4.30.0
+python-docx==1.1.2
+markdown==3.6
+openpyxl==3.1.5
+pandas==2.2.0
+
+# PDF Processing (MinerU - optional, may have conflicts)
+# mineru  # Uncomment if needed, may require --no-deps
+
+# Visualization
+matplotlib==3.7.2
+
+# Networking & Async
+aiohttp==3.9.5
+httpx==0.26.0
+requests==2.31.0
+
 # Utilities
-aiohttp==3.12.15
-tenacity==9.1.2
-tiktoken==0.10.0
-networkx==3.4.2
-numpy>=2.0.0
-pydantic==2.11.7
+tenacity==8.2.3
+tiktoken==0.5.2
+networkx==3.2.1
+pydantic==2.5.3
+tqdm==4.66.2
+huggingface_hub==0.20.3
+typing-extensions==4.9.0
 
-# Google Gemini SDK (for Gemini version - alternative to Azure)
-google-generativeai>=0.8.0
+# Additional dependencies for lightrag-hku 1.3.9 (Python 3.9)
+configparser==7.2.0
+pipmaster==0.9.2
+pyuca==1.2
+xlsxwriter>=3.1.0
 
-# Optional dependencies (uncomment as needed):
-# - [image]: Additional image processing
-# - [text]: reportlab>=4.0.0 (for TXT, MD to PDF conversion)
-# - [office]: requires LibreOffice (external program, not Python package)
-# - [docling]: docling==1.11.0 (alternative parser)
+# Protocol & Serialization
+protobuf==4.25.3
+grpcio==1.60.1
 
-# Development tools (optional)
-# pytest==8.3.2
-# pytest-asyncio==0.23.8
-# black==24.8.0
+# Computer Vision (for MinerU if installed)
+opencv-python-headless==4.10.0.84
+
+# Cloud Storage (optional)
+boto3==1.35.84
+
+# Language Detection
+fast-langdetect==0.2.0
+
+# JSON Repair
+json-repair==0.30.4
+
+# Logging
+loguru==0.7.3
+
+# CLI
+click==8.1.8
