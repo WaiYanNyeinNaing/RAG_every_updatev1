@@ -13,7 +13,7 @@ load_dotenv(dotenv_path=".env", override=False)
 async def test_azure_connection():
     """Test Azure OpenAI connection directly"""
     
-    print("Testing Azure OpenAI Connection...")
+    print("Testing Azure OpenAI Connection (GPT-4.1/gpt-4o)...")
     print("-" * 60)
     
     # Check environment variables
@@ -41,7 +41,7 @@ async def test_azure_connection():
     api_key = os.getenv("LLM_BINDING_API_KEY")
     azure_endpoint = os.getenv("LLM_BINDING_HOST")
     api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4")
+    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
     
     if not all([api_key, azure_endpoint, api_version]):
         print("ERROR: Missing required Azure OpenAI configuration")

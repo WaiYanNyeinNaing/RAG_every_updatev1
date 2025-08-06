@@ -257,7 +257,7 @@ def process_existing_pdf():
 # Create Gradio interface
 with gr.Blocks(title="RAG-Anything UI") as demo:
     gr.Markdown("""
-    # 🚀 RAG-Anything with Azure OpenAI
+    # 🚀 RAG-Anything with Azure OpenAI (GPT-4.1)
     
     Upload documents and ask questions about them using multimodal RAG.
     """)
@@ -373,7 +373,7 @@ with gr.Blocks(title="RAG-Anything UI") as demo:
         
         ## ⚙️ Current Configuration
         
-        - LLM: Azure OpenAI GPT-4
+        - LLM: Azure OpenAI GPT-4.1 (gpt-4o)
         - Embeddings: Azure OpenAI text-embedding-3-large
         - Parser: MinerU 2.0
         - Storage: Local (./rag_ui_storage)

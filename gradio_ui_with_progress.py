@@ -241,7 +241,7 @@ def process_document_with_progress(file):
             progress_tracker.enter_stage("ENTITY_EXTRACTION")
             status_updates.append((
                 "🎯 Extracting entities from content...\n"
-                "Using Azure GPT-4 for analysis",
+                "Using Azure GPT-4.1 (gpt-4o) for analysis",
                 70
             ))
             await asyncio.sleep(1)  # Simulate processing
@@ -335,7 +335,7 @@ def query_with_progress(question, timeout_seconds=60):
                 mode = "hybrid"
                 updates.append(("🔬 Using hybrid search mode...", 40, ""))
             
-            updates.append(("🤖 Querying Azure GPT-4...", 60, ""))
+            updates.append(("🤖 Querying Azure GPT-4.1...", 60, ""))
             
             result = await asyncio.wait_for(
                 rag.aquery(question, mode=mode, enable_rerank=False),
@@ -438,7 +438,7 @@ with gr.Blocks(title="RAG-Anything - Progress Tracking", theme=gr.themes.Soft())
                 gr.Markdown("""
                 - **Knowledge Graph Search** - Find relevant entities
                 - **Vector Search** - Semantic similarity matching
-                - **Azure GPT-4** - Generate comprehensive answer
+                - **Azure GPT-4.1** - Generate comprehensive answer
                 """)
                 
             with gr.Column():
@@ -479,8 +479,8 @@ with gr.Blocks(title="RAG-Anything - Progress Tracking", theme=gr.themes.Soft())
         | 📊 **Table Detection** | Identify and parse tables | 5-10s |
         | 🖼️ **Image Processing** | Extract and analyze images | 5-15s |
         | 📐 **Equation Recognition** | Convert formulas to LaTeX | 3-8s |
-        | 🎯 **Entity Extraction** | GPT-4 identifies key entities | 10-30s |
-        | 🔗 **Relation Extraction** | GPT-4 finds entity relationships | 10-30s |
+        | 🎯 **Entity Extraction** | GPT-4.1 identifies key entities | 10-30s |
+        | 🔗 **Relation Extraction** | GPT-4.1 finds entity relationships | 10-30s |
         | 🕸️ **Graph Building** | Construct knowledge graph | 5-10s |
         | 🔢 **Embedding Creation** | Generate vector representations | 5-15s |
         | 💾 **Indexing** | Store in vector database | 2-5s |

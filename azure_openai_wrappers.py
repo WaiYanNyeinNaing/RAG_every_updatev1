@@ -19,7 +19,7 @@ def create_azure_llm_func():
     api_key = os.getenv("LLM_BINDING_API_KEY")
     azure_endpoint = os.getenv("LLM_BINDING_HOST")
     api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1")
+    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
     
     # Create Azure OpenAI client
     client = AsyncAzureOpenAI(
@@ -125,7 +125,7 @@ def create_azure_vision_func():
     api_key = os.getenv("LLM_BINDING_API_KEY")
     azure_endpoint = os.getenv("LLM_BINDING_HOST")
     api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1")
+    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
     
     # Create Azure OpenAI client
     client = AsyncAzureOpenAI(
