@@ -1,0 +1,52 @@
+# Fixed requirements with exact versions from working environment
+# These versions are tested and working together without conflicts
+
+# Core dependencies
+python-dotenv==1.1.1
+gradio==5.41.0
+gradio-client==1.11.0
+gradio-pdf==0.0.22
+openai==1.50.0
+huggingface_hub
+
+# LightRAG packages
+# IMPORTANT: Install LightRAG from parent directory if available
+# pip install -e ..
+# Otherwise use:
+lightrag-hku==1.4.5
+
+# Document Processing & Parsing
+mineru[core]==2.1.10
+pypdf==4.3.1
+python-docx==1.1.2
+markdown==3.6
+Pillow>=10.0.0
+pandas==2.3.1
+openpyxl==3.1.5
+tqdm==4.67.1
+matplotlib==3.10.5  # Fixed version that works with mineru
+
+# Azure OpenAI specific
+azure-identity==1.17.1
+azure-core==1.30.2
+
+# Google Gemini SDK (for Gemini version)
+google-generativeai==0.8.5
+
+# Utilities
+aiohttp==3.12.15
+tenacity==9.1.2
+tiktoken==0.10.0
+networkx==3.4.2
+numpy>=2.0.0
+pydantic==2.11.7
+nest_asyncio==1.6.0
+
+# Additional dependencies to prevent conflicts
+protobuf==5.29.5
+grpcio==1.74.0
+typing-extensions==4.14.1
+
+# Optional (uncomment as needed):
+# reportlab>=4.0.0  # For TXT, MD to PDF conversion
+# docling==1.11.0  # Alternative parser
