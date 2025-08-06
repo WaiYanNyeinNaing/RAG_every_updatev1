@@ -1,0 +1,126 @@
+{
+  "doc-88b1b27b89688688e0eb9116a95b2027": {
+    "relation_pairs": [
+      [
+        "Flexible Design",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Clutch Reaction",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Transmission",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Steel or Multipole Trigger Wheels",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Different Transmission Types",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Contactless Scanning",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Shifting Pressure",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Different Transmission Applications",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Driving Comfort",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Hydraulic Oil",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Active Variant",
+        "Rotation Direction Recognition"
+      ],
+      [
+        "Membrane",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Electronic Evaluation Circuit",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Mounting Position",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Inductive Variant",
+        "Position-Independent Mounting"
+      ],
+      [
+        "Plug and Hydraulic Connections",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Inductive Sensor",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Bosch",
+        "Inductive Variant"
+      ],
+      [
+        "Transmission Control Unit (TCU)",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Hall Sensor",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Bosch",
+        "Transmission Speed Sensor"
+      ],
+      [
+        "Inductive Variant",
+        "TIM"
+      ],
+      [
+        "Transmission",
+        "Transmission Pressure Sensor"
+      ],
+      [
+        "Active Variant",
+        "EMC/ESD"
+      ],
+      [
+        "Flexible Design",
+        "Installation Space Requirements"
+      ],
+      [
+        "Inductive Variant",
+        "Output Signal"
+      ],
+      [
+        "Active Variant",
+        "Bosch"
+      ],
+      [
+        "Shifting Pressure",
+        "Transmission Control Unit (TCU)"
+      ],
+      [
+        "Gear",
+        "Transmission Control Unit (TCU)"
+      ]
+    ],
+    "count": 29,
+    "create_time": 1754458309,
+    "update_time": 1754458309,
+    "_id": "doc-88b1b27b89688688e0eb9116a95b2027"
+  }
+}
