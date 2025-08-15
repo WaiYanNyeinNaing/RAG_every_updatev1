@@ -7,6 +7,7 @@ With persistent storage and knowledge graph support
 import os
 import sys
 import json
+import re
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 import logging
@@ -537,6 +538,190 @@ def clear_all():
     
     return f"Cleared {count} documents from memory (RAG storage preserved)", []
 
+def search_pdfs_by_keyword(keyword):
+    """Search PDFs by filename keyword"""
+    if not keyword:
+        # Return all documents if no keyword
+        all_docs = [[fname, ""] for fname in sorted(processed_documents.keys())][:10]
+        return all_docs
+    
+    keyword_lower = keyword.lower()
+    filtered = []
+    for fname in sorted(processed_documents.keys()):
+        if keyword_lower in fname.lower():
+            filtered.append([fname, ""])
+    
+    return filtered[:10] if filtered else [["No matches found", ""]]
+
+def preview_document(evt: gr.SelectData, doc_list_data):
+    """Preview selected document"""
+    # Handle DataFrame input from Gradio
+    import pandas as pd
+    
+    if isinstance(doc_list_data, pd.DataFrame):
+        if doc_list_data.empty or evt.index[0] >= len(doc_list_data):
+            return "No document selected"
+        selected_file = doc_list_data.iloc[evt.index[0], 0]
+    elif isinstance(doc_list_data, list):
+        if not doc_list_data or evt.index[0] >= len(doc_list_data):
+            return "No document selected"
+        selected_file = doc_list_data[evt.index[0]][0]
+    else:
+        return "No document selected"
+    
+    if selected_file == "No matches found":
+        return "No document to preview"
+    
+    if selected_file in processed_documents:
+        doc = processed_documents[selected_file]
+        
+        # Create HTML formatted preview that looks like a PDF document
+        html_preview = f"""
+        <div style='font-family: Georgia, serif; background: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <div style='border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 15px;'>
+                <h3 style='color: #1a1a1a; margin: 0; font-size: 18px;'>📄 {selected_file}</h3>
+                <div style='color: #666; font-size: 12px; margin-top: 5px;'>
+                    <span>📅 {doc.get('processed_date', 'Unknown')}</span> | 
+                    <span>📊 {len(doc.get('text', ''))} characters</span>
+                </div>
+            </div>
+            
+            <div style='background: #fafafa; padding: 15px; border-radius: 3px; margin-bottom: 15px;'>
+                <h4 style='color: #333; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;'>Document Content</h4>
+                <div style='color: #2c3e50; font-size: 13px; line-height: 1.6; text-align: justify;'>
+        """
+        
+        # Format the text content
+        text = doc.get('text', 'No content available')
+        preview_text = text[:500] + "..." if len(text) > 500 else text
+        
+        # Convert line breaks to HTML and escape special characters
+        preview_text = preview_text.replace('\n\n', '</p><p style="margin: 10px 0;">').replace('\n', '<br>')
+        if not preview_text.startswith('<p'):
+            preview_text = f"<p style='margin: 10px 0;'>{preview_text}</p>"
+        
+        html_preview += preview_text
+        html_preview += """
+                </div>
+            </div>
+        """
+        
+        # Add analysis summary if available
+        if doc.get('analysis'):
+            analysis = doc.get('analysis', '')
+            # Extract key points
+            points = []
+            if "1. Main" in analysis:
+                first_section = analysis.split("2.")[0] if "2." in analysis else analysis[:500]
+                # Parse bullet points
+                lines = first_section.split('\n')
+                for line in lines[:5]:  # Show first 5 points
+                    if line.strip().startswith('-'):
+                        points.append(line.strip()[1:].strip())
+            
+            if points:
+                html_preview += """
+                <div style='background: #f0f8ff; padding: 15px; border-radius: 3px; border-left: 3px solid #4CAF50;'>
+                    <h4 style='color: #333; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;'>Key Insights</h4>
+                    <ul style='color: #2c3e50; font-size: 12px; line-height: 1.5; margin: 5px 0; padding-left: 20px;'>
+                """
+                for point in points:
+                    html_preview += f"<li style='margin: 5px 0;'>{point}</li>"
+                html_preview += """
+                    </ul>
+                </div>
+                """
+        
+        html_preview += "</div>"
+        return html_preview
+    
+    return "<div style='padding: 20px; color: #666; font-style: italic;'>Document not found in memory</div>"
+
+def show_related_documents(selected_docs):
+    """Show documents related to the selected one"""
+    import pandas as pd
+    
+    # Handle DataFrame input
+    if isinstance(selected_docs, pd.DataFrame):
+        if selected_docs.empty:
+            return [["Select a document first", ""]]
+        selected_file = selected_docs.iloc[0, 0]
+    elif isinstance(selected_docs, list):
+        if not selected_docs or len(selected_docs) == 0:
+            return [["Select a document first", ""]]
+        selected_file = selected_docs[0][0] if isinstance(selected_docs[0], list) else selected_docs[0]
+    else:
+        return [["Select a document first", ""]]
+    
+    # Simple related document logic - you can enhance this
+    # For now, show documents with similar naming patterns
+    related = []
+    if selected_file in processed_documents:
+        # Extract number or pattern from filename
+        numbers = re.findall(r'\d+', selected_file)
+        
+        for fname in processed_documents.keys():
+            if fname != selected_file:
+                # Check if they share common numbers or patterns
+                fname_numbers = re.findall(r'\d+', fname)
+                if any(num in fname_numbers for num in numbers):
+                    related.append([fname, "Related"])
+    
+    return related[:5] if related else [["No related documents found", ""]]
+
+def update_doc_relevance_after_query(query_result, current_docs):
+    """Update document list with relevance scores based on query results"""
+    if not query_result or not current_docs:
+        return current_docs
+    
+    # Parse query result to find mentioned documents
+    updated_docs = []
+    for doc_row in current_docs:
+        doc_name = doc_row[0]
+        relevance = ""
+        
+        # Check if document is mentioned in query result
+        if doc_name in query_result:
+            relevance = "⭐ High"
+        elif any(keyword in query_result.lower() for keyword in doc_name.lower().split('_')):
+            relevance = "✓ Medium"
+        
+        updated_docs.append([doc_name, relevance])
+    
+    return updated_docs
+
+def export_query_context(query, result, relevant_docs):
+    """Export query context including question, answer, and relevant documents"""
+    import pandas as pd
+    
+    # Handle DataFrame input
+    if isinstance(relevant_docs, pd.DataFrame):
+        relevant_list = []
+        for idx, row in relevant_docs.iterrows():
+            if len(row) > 1 and row[1]:  # Check if has relevance indicator
+                relevant_list.append(row[0])
+    else:
+        relevant_list = [doc[0] for doc in relevant_docs if len(doc) > 1 and doc[1]]
+    
+    context = {
+        "timestamp": datetime.now().isoformat(),
+        "query": query,
+        "result": result,
+        "relevant_documents": relevant_list
+    }
+    
+    context_file = Path("query_context.json")
+    with open(context_file, 'w') as f:
+        json.dump(context, f, indent=2)
+    
+    # Return HTML formatted success message
+    return f"""
+    <div style='padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;'>
+        <strong>✅ Context Exported Successfully!</strong><br>
+        <span style='font-size: 12px;'>Saved to: {context_file}</span>
+    </div>
+    """
+
 def get_library_status():
     """Get current library status - with dynamic sync"""
     # Re-sync with actual storage files
@@ -652,33 +837,66 @@ with gr.Blocks(title="Transparency Tool for Product Launch", theme=gr.themes.Sof
                 outputs=[process_log, file_status]
             )
         
-        # Query Tab
+        # Query Tab with Enhanced Visualization
         with gr.TabItem("🔍 Query Knowledge Base"):
             if docs_loaded > 0:
                 gr.Info(f"📚 {docs_loaded} documents ready for queries from existing RAG storage")
             
-            query_input = gr.Textbox(
-                label="Enter Your Question",
-                placeholder="What are the main risks in the product launch?",
-                lines=2
-            )
-            
             with gr.Row():
-                query_mode = gr.Radio(
-                    choices=["hybrid", "local", "global", "naive"],
-                    value="hybrid",
-                    label="Query Mode",
-                    info="Hybrid: Best overall | Local: Specific details | Global: Themes | Naive: Keywords",
-                    scale=3
-                )
-                query_btn = gr.Button("🔍 Search", variant="primary", scale=1)
-            
-            query_output = gr.Textbox(
-                label="Answer with References",
-                lines=20,
-                interactive=False,
-                value="Enter a question above to search the knowledge base." if docs_loaded > 0 else "No documents loaded. Please process documents first."
-            )
+                # Left side: Query interface
+                with gr.Column(scale=2):
+                    query_input = gr.Textbox(
+                        label="Enter Your Question",
+                        placeholder="What are the main risks in the product launch?",
+                        lines=2
+                    )
+                    
+                    with gr.Row():
+                        query_mode = gr.Radio(
+                            choices=["hybrid", "local", "global", "naive"],
+                            value="hybrid",
+                            label="Query Mode",
+                            info="Hybrid: Best overall | Local: Specific details | Global: Themes | Naive: Keywords",
+                            scale=3
+                        )
+                        query_btn = gr.Button("🔍 Search", variant="primary", scale=1)
+                    
+                    query_output = gr.Textbox(
+                        label="Answer with References",
+                        lines=20,
+                        interactive=False,
+                        value="Enter a question above to search the knowledge base." if docs_loaded > 0 else "No documents loaded. Please process documents first."
+                    )
+                
+                # Right side: Document visualization and search
+                with gr.Column(scale=1):
+                    gr.Markdown("### 📄 Document Explorer")
+                    
+                    # PDF search box
+                    pdf_search = gr.Textbox(
+                        label="Search PDFs by filename",
+                        placeholder="Type to filter PDFs...",
+                        lines=1
+                    )
+                    
+                    # Document list with visualization
+                    doc_list = gr.Dataframe(
+                        headers=["📄 Document", "📊 Relevance"],
+                        value=[[fname, ""] for fname in sorted(processed_documents.keys())][:10] if processed_documents else [],
+                        interactive=False,
+                        height=200
+                    )
+                    
+                    # Selected document preview
+                    with gr.Accordion("📖 Document Preview", open=False):
+                        selected_doc_info = gr.HTML(
+                            value="<div style='padding: 10px; background: #f8f9fa; border-radius: 5px; font-family: Arial, sans-serif;'><p style='color: #666;'>Click on a document to preview</p></div>"
+                        )
+                    
+                    # Visualization controls
+                    with gr.Row():
+                        show_related_btn = gr.Button("🔗 Show Related", size="sm")
+                        export_context_btn = gr.Button("💾 Export Context", size="sm")
             
             gr.Examples(
                 examples=[
@@ -693,10 +911,48 @@ with gr.Blocks(title="Transparency Tool for Product Launch", theme=gr.themes.Sof
                 inputs=query_input
             )
             
+            # Enhanced query with document relevance update
+            def query_and_update_relevance(query, mode):
+                result = query_documents(query, mode)
+                # After getting result, update document relevance
+                return result
+            
             query_btn.click(
-                query_documents,
+                query_and_update_relevance,
                 inputs=[query_input, query_mode],
                 outputs=query_output
+            ).then(
+                update_doc_relevance_after_query,
+                inputs=[query_output, doc_list],
+                outputs=doc_list
+            )
+            
+            # PDF search functionality
+            pdf_search.change(
+                search_pdfs_by_keyword,
+                inputs=pdf_search,
+                outputs=doc_list
+            )
+            
+            # Document selection for preview
+            doc_list.select(
+                preview_document,
+                inputs=doc_list,
+                outputs=selected_doc_info
+            )
+            
+            # Show related documents
+            show_related_btn.click(
+                show_related_documents,
+                inputs=doc_list,
+                outputs=doc_list
+            )
+            
+            # Export context
+            export_context_btn.click(
+                export_query_context,
+                inputs=[query_input, query_output, doc_list],
+                outputs=selected_doc_info
             )
         
         # Library Tab
