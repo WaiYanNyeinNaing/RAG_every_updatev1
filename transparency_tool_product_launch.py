@@ -64,12 +64,65 @@ def initialize_azure():
         logger.error(f"Connection failed: {e}")
         return False
 
+def sync_with_storage():
+    """Sync document list with actual files in storage directories"""
+    synced_docs = {}
+    
+    # Check RAG storage for actual documents
+    if RAG_STORAGE_PATH.exists():
+        docs_file = RAG_STORAGE_PATH / "kv_store_full_docs.json"
+        if docs_file.exists():
+            try:
+                with open(docs_file, 'r') as f:
+                    rag_docs = json.load(f)
+                    for doc_id, doc_data in rag_docs.items():
+                        # Use original filename if available in metadata
+                        metadata = doc_data.get("metadata", {})
+                        fname = metadata.get("filename")
+                        if not fname:
+                            fname = f"Document_{doc_id[:8]}"
+                        
+                        synced_docs[fname] = {
+                            "source": "rag_storage",
+                            "doc_id": doc_id,
+                            "exists": True
+                        }
+                        
+                        # Don't create duplicate entries with doc IDs when we have the original filename
+            except Exception as e:
+                logger.error(f"Error reading RAG storage: {e}")
+    
+    # Check output directory for PDFs
+    if OUTPUT_PATH.exists():
+        for pdf_file in OUTPUT_PATH.glob("*.pdf"):
+            if pdf_file.name not in synced_docs:
+                synced_docs[pdf_file.name] = {
+                    "source": "output",
+                    "path": str(pdf_file),
+                    "exists": True
+                }
+    
+    return synced_docs
+
 def load_existing_data():
-    """Load existing processed documents and RAG storage data"""
+    """Load existing processed documents and RAG storage data - dynamically synced"""
     global processed_documents, rag_storage_data
     
     loaded_docs = 0
     has_rag_storage = False
+    
+    # First, sync with actual storage to see what really exists
+    actual_files = sync_with_storage()
+    
+    # Store current in-memory documents that aren't from storage
+    in_memory_docs = {}
+    for fname, doc in processed_documents.items():
+        # Keep documents that were just processed but not yet in storage
+        if not doc.get('doc_id') and fname not in actual_files:
+            in_memory_docs[fname] = doc
+    
+    # Clear processed_documents to reload from storage
+    processed_documents.clear()
     
     # Load from RAG storage if exists
     if RAG_STORAGE_PATH.exists():
@@ -79,20 +132,26 @@ def load_existing_data():
             if docs_file.exists():
                 with open(docs_file, 'r') as f:
                     rag_docs = json.load(f)
-                    # Convert RAG storage format to our format
+                    # Only add documents that actually exist
                     for doc_id, doc_data in rag_docs.items():
-                        # Extract filename from content or use doc_id
-                        content = doc_data.get("content", "")
-                        # Try to extract original filename from content
-                        fname = f"Document_{doc_id[:8]}"
+                        # Try to get original filename from metadata, fallback to doc ID
+                        metadata = doc_data.get("metadata", {})
+                        fname = metadata.get("filename")
+                        if not fname:
+                            fname = f"Document_{doc_id[:8]}"
                         
-                        processed_documents[fname] = {
-                            "text": content,
-                            "analysis": f"Loaded from existing RAG storage (ID: {doc_id[:8]})",
-                            "processed_date": datetime.fromtimestamp(doc_data.get("create_time", 0)).isoformat() if doc_data.get("create_time") else datetime.now().isoformat(),
-                            "doc_id": doc_id
-                        }
-                        loaded_docs += 1
+                        # Check if this document exists in actual files by filename
+                        if fname in actual_files:
+                            content = doc_data.get("content", "")
+                            analysis = metadata.get("analysis", f"Loaded from existing RAG storage (ID: {doc_id[:8]})")
+                            
+                            processed_documents[fname] = {
+                                "text": content,
+                                "analysis": analysis,
+                                "processed_date": datetime.fromtimestamp(doc_data.get("create_time", 0)).isoformat() if doc_data.get("create_time") else datetime.now().isoformat(),
+                                "doc_id": doc_id
+                            }
+                            loaded_docs += 1
                 
                 # Load other RAG storage files for reference
                 chunks_file = RAG_STORAGE_PATH / "vdb_chunks.json"
@@ -111,18 +170,51 @@ def load_existing_data():
         except Exception as e:
             logger.error(f"Error loading RAG storage: {e}")
     
-    # Also check for cached document metadata
-    if DOCUMENT_CACHE_PATH.exists() and loaded_docs == 0:
+    # Load cached metadata but only for files that actually exist
+    if DOCUMENT_CACHE_PATH.exists():
         try:
             with open(DOCUMENT_CACHE_PATH, 'r') as f:
                 cache_data = json.load(f)
+                stale_entries = []
                 for fname, metadata in cache_data.items():
-                    if fname not in processed_documents:
-                        processed_documents[fname] = metadata
-                        loaded_docs += 1
-                logger.info(f"📚 Loaded {loaded_docs} documents from cache")
+                    # Check if this cached file actually exists in storage
+                    if fname in actual_files:
+                        if fname not in processed_documents:
+                            processed_documents[fname] = metadata
+                            loaded_docs += 1
+                    else:
+                        stale_entries.append(fname)
+                
+                if stale_entries:
+                    logger.info(f"🧹 Removing {len(stale_entries)} stale cache entries: {', '.join(stale_entries[:3])}...")
+                    # Update cache to remove stale entries
+                    save_document_cache()
+                    
         except Exception as e:
             logger.error(f"Error loading document cache: {e}")
+    
+    # Add any output PDFs that aren't in processed_documents
+    if OUTPUT_PATH.exists():
+        for pdf_file in OUTPUT_PATH.glob("*.pdf"):
+            if pdf_file.name not in processed_documents and pdf_file.name in actual_files:
+                processed_documents[pdf_file.name] = {
+                    "text": f"PDF file in output directory",
+                    "analysis": f"Found in output directory",
+                    "processed_date": datetime.fromtimestamp(pdf_file.stat().st_mtime).isoformat(),
+                    "doc_id": ""
+                }
+                loaded_docs += 1
+    
+    # Restore in-memory documents that aren't in storage yet
+    for fname, doc in in_memory_docs.items():
+        processed_documents[fname] = doc
+        loaded_docs += 1
+    
+    logger.info(f"✅ Sync complete: {loaded_docs} valid documents found")
+    
+    # Save the synced state to cache
+    if loaded_docs > 0:
+        save_document_cache()
     
     return loaded_docs, has_rag_storage
 
@@ -143,6 +235,37 @@ def save_document_cache():
         logger.info(f"💾 Saved document cache with {len(cache_data)} entries")
     except Exception as e:
         logger.error(f"Error saving document cache: {e}")
+
+def save_to_rag_storage():
+    """Save current documents to RAG storage format"""
+    try:
+        # Create RAG storage directory if it doesn't exist
+        RAG_STORAGE_PATH.mkdir(exist_ok=True)
+        
+        # Prepare documents for RAG storage
+        rag_docs = {}
+        for fname, doc in processed_documents.items():
+            # Generate or use existing doc_id
+            doc_id = doc.get('doc_id') or f"doc-{hash(fname + doc.get('text', ''))}"
+            rag_docs[doc_id] = {
+                "content": doc.get('text', ''),
+                "create_time": int(datetime.now().timestamp()),
+                "metadata": {
+                    "filename": fname,
+                    "analysis": doc.get('analysis', '')
+                }
+            }
+        
+        # Save to RAG storage
+        docs_file = RAG_STORAGE_PATH / "kv_store_full_docs.json"
+        with open(docs_file, 'w') as f:
+            json.dump(rag_docs, f, indent=2)
+        
+        logger.info(f"💾 Saved {len(rag_docs)} documents to RAG storage")
+        return True
+    except Exception as e:
+        logger.error(f"Error saving to RAG storage: {e}")
+        return False
 
 def extract_text_from_pdf(file_path):
     """Extract text from PDF"""
@@ -303,6 +426,13 @@ def process_files(files, merge_mode=True):
     if merge_mode and new_count > 0:
         log += f" ({new_count} new, {existing_count} existing)"
     
+    # Save to RAG storage after processing
+    if new_count > 0:
+        if save_to_rag_storage():
+            log += "\n💾 Saved to RAG storage"
+        else:
+            log += "\n⚠️ Could not save to RAG storage"
+    
     return log, results
 
 def query_documents(query, mode):
@@ -408,9 +538,12 @@ def clear_all():
     return f"Cleared {count} documents from memory (RAG storage preserved)", []
 
 def get_library_status():
-    """Get current library status"""
+    """Get current library status - with dynamic sync"""
+    # Re-sync with actual storage files
+    load_existing_data()
+    
     if not processed_documents:
-        return "📚 Library is empty", []
+        return "📚 Library is empty (no documents found in storage)", []
     
     data = []
     for fname, doc in processed_documents.items():
@@ -424,7 +557,7 @@ def get_library_status():
                 pass
         
         # Add source indicator
-        source = "RAG" if doc.get('doc_id') else "New"
+        source = "RAG" if doc.get('doc_id') else "Output" if fname.endswith('.pdf') else "New"
         data.append([fname, size, date, source])
     
     rag_status = "✅ Loaded" if rag_storage_data else "📁 Available" if RAG_STORAGE_PATH.exists() else "❌ Not found"
