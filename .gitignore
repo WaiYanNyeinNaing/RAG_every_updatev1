@@ -1,85 +1,246 @@
-# Python-related files
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.*.local
+*.env
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
 *.egg-info/
-.eggs/
-*.tgz
-*.tar.gz
-
-# Virtual Environment
-.venv/
-env/
-venv/
-venv_rag_anything/
-
-# Environment files
-.env
-.env.*
-!.env.sample
-*.env
-env.example
-
-# Build / Distribution
 dist/
 build/
-site/
+*.egg
+.eggs/
+*.whl
 
-# Logs / Reports
-*.log
-*.log.*
-*.logfire
-*.coverage/
-log/
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+.virtualenv/
+virtualenv/
+myenv/
+.conda/
+conda-env/
 
-# Caches
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data and Storage
+rag_storage/
+rag_storage_azure/
+output/
+outputs/
+data/
+datasets/
+*.db
+*.sqlite
+*.sqlite3
+*.h5
+*.hdf5
+
+# Model Files
+*.pkl
+*.pickle
+*.pth
+*.pt
+*.onnx
+*.pb
+*.h5
+*.keras
+*.safetensors
+models/
+checkpoints/
+weights/
+
+# Document Cache
+document_cache.json
+library_export.json
+*.cache
+cache/
 .cache/
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-.gradio/
-.history/
+tmp/
 temp/
 
-# IDE / Editor Files
-.idea/
-.vscode/
-.vscode/settings.json
+# Logs
+*.log
+logs/
+*.log.*
+log/
+logging/
 
-# Framework-specific files
-local_neo4jWorkDir/
-neo4jWorkDir/
+# Large Files
+*.pdf
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.xls
+*.xlsx
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
 
-# Data & Storage
-inputs/
-rag_storage*/
-examples/input/
-examples/output/
-output*/
+# Media Files
+*.mp4
+*.avi
+*.mov
+*.mp3
+*.wav
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.svg
+videos/
+images/
+audio/
 
-# Miscellaneous
-.DS_Store
-TODO.md
-ignore_this.txt
-*.ignore.*
+# Gradio
+gradio_cached_examples/
+flagged/
+gradio_queue.db
+gradio_queue.db-journal
 
-# Project-specific files
-dickens*/
-book.txt
-LightRAG.pdf
-LightRAG_2-4.pdf
-download_models_hf.py
-lightrag-dev/
-gui/
+# LightRAG Specific
+nano_vectordb/
+vdb_*.json
+kv_store_*.json
+graph_*.graphml
+*.graphml
 
-# unit-test files (keep our custom test scripts)
-# test_*
+# MinerU/Docling Output
+minerU_output/
+docling_output/
+parsed_documents/
+
+# Node.js (if any frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Testing
 .pytest_cache/
-__test__/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+coverage.xml
+*.cover
+.coverage.*
 
-# Cline files
-memory-bank/
+# Backup Files
+*.bak
+*.backup
+*.old
+*.orig
+*_backup.*
+backup/
 
-# AI
-.claude/
-.cursor/
-CLAUDE.md
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Certificates and Keys
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+
+# RAGAnything Specific
+raganything/__pycache__/
+modal_processors/__pycache__/
+utils/__pycache__/
+parsers/__pycache__/
+
+# Temporary Files
+*.tmp
+*.temp
+.~*
+
+# Configuration Files (except samples)
+config.json
+config.yaml
+config.yml
+settings.json
+!.env.sample
+!config.sample.*
+!settings.sample.*
+
+# Dependencies
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Distribution
+dist/
+build/
+*.egg-info/
+.installed.cfg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Documentation Build
+docs/_build/
+docs/.build/
+site/
+
+# Profiling
+*.prof
+*.lprof
+
+# Type Checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Memory Dumps
+*.dump
+*.core
+
+# Custom Ignores for Project
+processed_files/
+extracted_content/
+embeddings/
+vectors/
+*.embedding
+*.vector
