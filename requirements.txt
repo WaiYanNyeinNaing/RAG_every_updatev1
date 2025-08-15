@@ -60,7 +60,7 @@ pyuca==1.2
 xlsxwriter>=3.1.0
 
 # Protocol & Serialization
-protobuf==4.25.3
+protobuf==6.32.0
 grpcio==1.60.1
 
 # Computer Vision (for MinerU if installed)
